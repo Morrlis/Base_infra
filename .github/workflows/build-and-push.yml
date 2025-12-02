@@ -36,7 +36,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract version from tag
+      - name: Extract version and normalize names
         id: meta
         run: |
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -44,8 +44,12 @@ jobs:
           else
             TAG="${GITHUB_REF#refs/tags/}"
           fi
+          # Convert repository owner to lowercase (Docker requirement)
+          OWNER_LC=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "owner=${OWNER_LC}" >> $GITHUB_OUTPUT
           echo "Building version: ${TAG}"
+          echo "Repository owner (lowercase): ${OWNER_LC}"
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -53,8 +57,8 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/e2e-base:${{ steps.meta.outputs.tag }}
-            ghcr.io/${{ github.repository_owner }}/e2e-base:latest
+            ghcr.io/${{ steps.meta.outputs.owner }}/e2e-base:${{ steps.meta.outputs.tag }}
+            ghcr.io/${{ steps.meta.outputs.owner }}/e2e-base:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
@@ -62,8 +66,8 @@ jobs:
       - name: Image details
         run: |
           echo "✅ Image pushed successfully!"
-          echo "📦 Repository: ghcr.io/${{ github.repository_owner }}/e2e-base"
+          echo "📦 Repository: ghcr.io/${{ steps.meta.outputs.owner }}/e2e-base"
           echo "🏷️  Tags: ${{ steps.meta.outputs.tag }}, latest"
           echo ""
           echo "Usage in projects:"
-          echo "FROM ghcr.io/${{ github.repository_owner }}/e2e-base:${{ steps.meta.outputs.tag }}"
+          echo "FROM ghcr.io/${{ steps.meta.outputs.owner }}/e2e-base:${{ steps.meta.outputs.tag }}"
