@@ -31,13 +31,8 @@ RUN apt-get update && apt-get install -y \
 # Создать рабочую директорию по умолчанию
 WORKDIR /app
 
-# Проверка установки Playwright (health check)
-RUN python -c "from playwright.sync_api import sync_playwright; print('Playwright OK')"
-
-# Информация о браузерах (для отладки)
-RUN playwright --version && \
-    echo "Installed browsers:" && \
-    ls -lah /ms-playwright/
+# Информация о версиях (для отладки)
+RUN playwright --version
 
 # По умолчанию запускаем shell (можно переопределить в проектах)
 CMD ["/bin/bash"]
