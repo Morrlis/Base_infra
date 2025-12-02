@@ -28,12 +28,6 @@ RUN apt-get update && apt-get install -y \
     vim \
     && rm -rf /var/lib/apt/lists/*
 
-# Обновить pip и установить базовые Python пакеты
-RUN pip install --no-cache-dir --upgrade \
-    pip==24.0 \
-    setuptools==69.0.3 \
-    wheel==0.42.0
-
 # Создать рабочую директорию по умолчанию
 WORKDIR /app
 
